@@ -1,6 +1,10 @@
 <template>
   <div id="main">
-    <div id="mapDiv"></div>
+    <div id="mapDiv">
+      <div id="map-switch">
+        <div @click="base_map_switch()" v-bind:class="{'vector-base': vector_base, 'image-base': !vector_base}"></div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -8,6 +12,8 @@ export default {
   name: "main-vue",
   data() {
     return {
+      vector_base: true,
+      image_base: null,
       data_info: [[116.417854, 39.921988, "地址：北京市东城区王府井大街88号乐天银泰百货八层"],
       [116.406605, 39.921585, "地址：北京市东城区东华门大街"],
       [116.412222, 39.912345, "地址：北京市东城区正义路甲5号"]
@@ -15,14 +21,40 @@ export default {
     }
   },
   mounted() {
-    debugger
     var zoom = CONFIG.init_zoom;
     var x = CONFIG.init_center.x, y = CONFIG.init_center.y;
-    map = new T.Map('mapDiv');
+    map = new T.Map('mapDiv', {
+      // projection: 'EPSG:4326'
+    });
     map.centerAndZoom(new T.LngLat(x, y), zoom);
+    //创建缩放平移控件对象
+    var control = new T.Control.Zoom();
+    //添加缩放平移控件
+    map.addControl(control);
+    //允许鼠标滚轮缩放地图
+    map.enableScrollWheelZoom();
+    //创建比例尺控件对象
+    var scale = new T.Control.Scale();
+    //添加比例尺控件
+    map.addControl(scale);
+
     this.fetchStations();
   },
   methods: {
+    base_map_switch() {
+      this.vector_base = !this.vector_base;
+      if (this.vector_base) {
+        map.removeLayer(this.image_base);
+      } else {
+        var imageURL = "http://t0.tianditu.cn/img_w/wmts?" +
+          "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles" +
+          "&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}";
+        //创建自定义图层对象
+        this.image_base = new T.TileLayer(imageURL, { minZoom: 1, maxZoom: 18 });
+        //将图层增加到地图上
+        map.addLayer(this.image_base);
+      }
+    },
     //获取目前所有站点
     fetchStations() {
       //...
@@ -83,10 +115,33 @@ html {
   overflow: hidden;
 }
 
+#map-switch {
+  width: 70px;
+  height: 65px;
+  position: absolute;
+  bottom: 100px;
+  left: 30px;
+  z-index: 999;
+}
+
 input,
 b,
 p {
   margin-left: 5px;
   font-size: 14px
+}
+
+.vector-base,
+.image-base {
+  width: 100%;
+  height: 100%;
+}
+
+.vector-base {
+  background-image: url("../assets/image_base.jpg")
+}
+
+.image-base {
+  background-image: url("../assets/vector_base.jpg")
 }
 </style>
