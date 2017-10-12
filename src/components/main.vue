@@ -1,9 +1,24 @@
 <template>
   <div id="main">
     <div id="mapDiv">
+      <!-- 地图底图切换 -->
       <div id="map-switch">
         <div @click="base_map_switch()" v-bind:class="{'vector-base': vector_base, 'image-base': !vector_base}"></div>
       </div>
+      <!-- 用户头像 -->
+      <div id="user-logo">
+        <div v-if="user_name&&!show_data" class="user-in" @click="data_panel_switcher">
+          <span class="user-in-logo"></span>
+          <span class="user-name">{{user_name}}</span>
+        </div>
+        <div v-if="user_name&&show_data" class="user-in" @click="data_panel_switcher">
+          <span class="user-name" style="float:none !important;">{{user_name}}</span>
+          <span class="user-in-logo" style="float:right !important;"></span>
+        </div>
+        <div v-if="!user_name" class="user-out"></div>
+      </div>
+      <!-- 功能区面板 -->
+      <div id="data-panel" v-show="show_data"></div>
     </div>
   </div>
 </template>
@@ -14,6 +29,8 @@ export default {
     return {
       vector_base: true,
       image_base: null,
+      user_name: "赵文武",
+      show_data: false,
       data_info: [[116.417854, 39.921988, "地址：北京市东城区王府井大街88号乐天银泰百货八层"],
       [116.406605, 39.921585, "地址：北京市东城区东华门大街"],
       [116.412222, 39.912345, "地址：北京市东城区正义路甲5号"]
@@ -41,6 +58,7 @@ export default {
     this.fetchStations();
   },
   methods: {
+    // 地图底图切换
     base_map_switch() {
       this.vector_base = !this.vector_base;
       if (this.vector_base) {
@@ -54,6 +72,10 @@ export default {
         //将图层增加到地图上
         map.addLayer(this.image_base);
       }
+    },
+    //是否显示数据面板切换
+    data_panel_switcher() {
+      this.show_data = !this.show_data;
     },
     //获取目前所有站点
     fetchStations() {
@@ -119,9 +141,9 @@ html {
   width: 70px;
   height: 65px;
   position: absolute;
-  bottom: 100px;
-  left: 30px;
-  z-index: 999;
+  bottom: 65px;
+  left: 10px;
+  z-index: 1000;
 }
 
 input,
@@ -135,6 +157,7 @@ p {
 .image-base {
   width: 100%;
   height: 100%;
+  cursor: pointer;
 }
 
 .vector-base {
@@ -143,5 +166,59 @@ p {
 
 .image-base {
   background-image: url("../assets/vector_base.jpg")
+}
+
+.user-in,
+.user-out {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1020;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.user-in {
+  height: 40px;
+  width: auto;
+  font-size: 16px;
+  background-color: #3385ff;
+  color: #fff;
+  /* padding: 0 15px; */
+  line-height: 40px;
+  border-radius: 20px;
+}
+
+.user-in-logo,
+.user-name {
+  display: inline-block;
+}
+
+.user-name {
+  float: right;
+  padding: 0 8px;
+}
+
+.user-out,
+.user-in-logo {
+  height: 40px;
+  width: 40px;
+  background: #fff;
+  background-size: cover;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-image: url("../assets/user.png");
+}
+
+#data-panel {
+  position: absolute;
+  top: 70px;
+  right: 10px;
+  bottom: 10px;
+  width: 300px;
+  /* height: 100%; */
+  background-color: #0ef;
+  z-index: 1030;
 }
 </style>
